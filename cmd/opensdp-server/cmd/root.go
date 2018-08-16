@@ -6,6 +6,8 @@ import (
 	"os"
 	"bytes"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+	"path/filepath"
 )
 
 var (
@@ -13,6 +15,14 @@ var (
 	Verbose = false
 	VerboseSplit = false
 	ver = false
+	cfgFile string
+	servicesPath string
+
+	caPath string
+	serverCertPath string
+	serverKeyPath string
+	bind string
+	port uint16
 )
 
 var rootCmd = &cobra.Command{
@@ -25,19 +35,89 @@ hidden services they are authorized to use.`,
 			fmt.Printf("OpenSDP server version: %s\n", Version)
 			return
 		}
-		cmd.Help()
+
+		ifEmptyReturnError(viper.GetString("ca-cert"), "missing ca certificate")
+		ifEmptyReturnError(viper.GetString("certificate"), "missing server certificate")
+		ifEmptyReturnError(viper.GetString("key"), "missing server key")
+
+		startServer()
 	},
 }
 
+func ifEmptyReturnError(variable, err string) {
+	if variable == "" {
+		log.Fatalf(err)
+		os.Exit(badInput)
+	}
+}
+
 func init() {
-	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
+	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(initFlags)
+	rootCmd.Flags().StringVar(&caPath, "ca-cert", "", "certificate of the CA")
+	rootCmd.Flags().StringVarP(&serverCertPath, "certificate", "c", "",
+		"certificate of the server")
+	rootCmd.Flags().StringVarP(&serverKeyPath, "key", "k", "",
+		"private key of the server")
+	rootCmd.Flags().StringVarP(&bind, "bind", "b", "0.0.0.0",
+		"bind server to IP")
+	rootCmd.Flags().Uint16VarP(&port, "port", "p", 8443, "port to listen to")
+
+	rootCmd.Flags().StringVar(&cfgFile, "config", "", "config file (default: ./config.yaml)")
+	rootCmd.Flags().StringVar(&servicesPath, "services", "", "services file (default: ./services.yaml)")
+
+	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false,
+		"verbose output")
 	rootCmd.PersistentFlags().BoolVar(&VerboseSplit, "verbose-split", false,
 		"split output to stdout (until but not including error level) and stderr (error level)")
 	rootCmd.Flags().BoolVar(&ver, "version", false, "version of the server")
 
+	viper.BindPFlag("ca-cert", rootCmd.Flags().Lookup("ca-cert"))
+	viper.BindPFlag("certificate", rootCmd.Flags().Lookup("certificate"))
+	viper.BindPFlag("key", rootCmd.Flags().Lookup("key"))
+	viper.BindPFlag("bind", rootCmd.Flags().Lookup("bind"))
+	viper.BindPFlag("port", rootCmd.Flags().Lookup("port"))
+	viper.BindPFlag("clients", rootCmd.Flags().Lookup("clients"))
+	viper.BindPFlag("services", rootCmd.Flags().Lookup("services"))
+
 	log.SetOutput(os.Stdout)
 	cobra.OnInitialize(verboseSplit)
 	cobra.OnInitialize(verboseLog)
+}
+
+// Read config values
+func initConfig() {
+	if cfgFile != "" {
+		// Use config file path provided by the flag
+		viper.SetConfigFile(cfgFile)
+	} else {
+		// User default
+		dir, err := os.Executable()
+		if err != nil {
+			panic(err)
+		}
+
+		viper.AddConfigPath(dir)
+		viper.SetConfigName("config.yaml")
+	}
+
+	if err := viper.ReadInConfig(); err != nil {
+		log.Error("failed to read config")
+		log.Error(err)
+		os.Exit(unexpectedError)
+	}
+}
+
+func initFlags() {
+	dir, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+
+	defaultServices := filepath.Join(dir, "services.yaml")
+	if viper.GetString("services") == "" {
+		viper.Set("services", defaultServices)
+	}
 }
 
 // Used to route error level logs to stderr and the rest to stdout.
