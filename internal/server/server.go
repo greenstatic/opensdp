@@ -6,9 +6,15 @@ import (
 	"crypto/x509"
 	"crypto/tls"
 	"net/http"
-	"fmt"
 	"net"
 	"github.com/greenstatic/opensdp/internal/services"
+	"github.com/greenstatic/opensdp/internal/clients"
+	"encoding/json"
+	"time"
+)
+
+var (
+	Version = "0.1.0"
 )
 
 type Server struct {
@@ -18,14 +24,27 @@ type Server struct {
 	Bind string
 	Port string
 	Services []services.Service
+	Clients map[string]clients.Client
 }
 
 
-// HelloUser is a view that greets a user
-func HelloUser(w http.ResponseWriter, req *http.Request) {
+func rootResponse(w http.ResponseWriter, req *http.Request) {
 	cn := req.TLS.PeerCertificates[0].Subject.CommonName
 
-	fmt.Fprintf(w, "Hello %v! \n", cn)
+	json.NewEncoder(w).Encode(struct {
+		Success bool `json:"success"`
+		Msg string `json:"msg"`
+		DeviceId string `json:"deviceId"`
+		Datetime string `json:"datetime"`
+		Version string `json:"version"`
+	}{
+		true,
+		"OpenSDP Server",
+		cn,
+		time.Now().Format(time.RFC3339),
+		Version,
+	})
+
 }
 
 func (s *Server) Start() {
@@ -54,7 +73,8 @@ func (s *Server) Start() {
 
 	tlsConfig.BuildNameToCertificate()
 
-	http.HandleFunc("/", HelloUser)
+	http.HandleFunc("/discover", s.discoverResponseWrapper())
+	http.HandleFunc("/", rootResponse)
 
 	httpServer := &http.Server{
 		Addr: net.JoinHostPort(s.Bind, s.Port),

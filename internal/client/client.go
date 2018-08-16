@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"net/http"
 	"fmt"
+	netUrl "net/url"
 )
 
 type Client struct {
@@ -17,8 +18,21 @@ type Client struct {
 }
 
 
-func (c *Client) Request() {
-	url := "https://" + c.ServerUrl
+func (c *Client) Request() error {
+
+	// Build url
+	urlRawStr := "https://" + c.ServerUrl
+	urlParsed, err := netUrl.Parse(urlRawStr)
+	if err != nil {
+		log.WithField("url", urlRawStr).Error("Failed to build server url")
+		return err
+	}
+
+	url := urlParsed.String()
+	if url[len(url) - 1:] != "/" {
+		url += "/"
+	}
+	url += "discover"
 
 	log.WithFields(log.Fields{
 		"url": url,
@@ -31,11 +45,13 @@ func (c *Client) Request() {
 	cert, err := tls.LoadX509KeyPair(c.ClientCertPath, c.ClientKeyPath)
 	if err != nil {
 		log.Fatalln("Unable to load cert", err)
+		return err
 	}
 
 	clientCACert, err := ioutil.ReadFile(c.CAPath)
 	if err != nil {
 		log.Fatal("Unable to open cert", err)
+		return err
 	}
 
 	clientCertPool := x509.NewCertPool()
@@ -55,9 +71,12 @@ func (c *Client) Request() {
 	resp, err := client.Get(url)
 	if err != nil {
 		log.Println("Unable to connect to server", err)
+		return err
 	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	fmt.Printf("%s\n", body)
+
+	return nil
 }

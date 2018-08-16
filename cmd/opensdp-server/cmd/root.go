@@ -17,6 +17,7 @@ var (
 	ver = false
 	cfgFile string
 	servicesPath string
+	clientsPath string
 
 	caPath string
 	serverCertPath string
@@ -65,6 +66,7 @@ func init() {
 
 	rootCmd.Flags().StringVar(&cfgFile, "config", "", "config file (default: ./config.yaml)")
 	rootCmd.Flags().StringVar(&servicesPath, "services", "", "services file (default: ./services.yaml)")
+	rootCmd.Flags().StringVar(&clientsPath, "clients", "", "clients file (default: ./clients.yaml)")
 
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false,
 		"verbose output")

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strings"
 	"strconv"
+	log "github.com/sirupsen/logrus"
 )
 
 type ports []string
@@ -27,7 +28,7 @@ type servicesFile struct {
 	Services []serviceFile
 }
 
-func Read(path string) ([]services.Service, error) {
+func ServicesRead(path string) ([]services.Service, error) {
 
 	// Read file
 	data, err := ioutil.ReadFile(path)
@@ -54,6 +55,8 @@ func Read(path string) ([]services.Service, error) {
 		if err != nil {
 			return nil, errors.New(fmt.Sprintf("failed parsing service: %s", err))
 		}
+
+		log.WithField("name", serv.Name).Debug("Loaded service configuration")
 
 		allServices = append(allServices, serv)
 	}
