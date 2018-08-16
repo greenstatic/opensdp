@@ -5,6 +5,8 @@ import (
 	"github.com/greenstatic/opensdp/internal/client"
 	log "github.com/sirupsen/logrus"
 	"os"
+	"fmt"
+	"strings"
 )
 
 var (
@@ -33,7 +35,35 @@ var servicesCmd = &cobra.Command{
 			clientKeyPath,
 			}
 
-		c.Request()
+		services, err := c.Discover()
+		if err != nil {
+			log.Error("Failed to perform discover exchange")
+			log.Error(err)
+			os.Exit(unexpectedError)
+		}
+
+		if len(services) == 0 {
+			fmt.Println("You do not have access to any services")
+			return
+		}
+
+		fmt.Println("You have access to the following services:")
+		fmt.Printf("|%-26s|%-26s|%-18s|%-12s|%-20s|\n", "Name", "IP(s)", "Port(s)", "Access Type", "Tag(s)")
+
+		const dashLen = 108
+		for i := 0; i < dashLen; i++ {
+			fmt.Printf("-")
+		}
+		fmt.Printf("\n")
+
+		for _, s := range services {
+			ips := strings.Join(s.IpsToStrings(), ", ")
+			ports := strings.Join(s.ProtoPortToString(), ", ")
+			accessTypes := strings.Join(s.AccessTypeToString(), ", ")
+			tags := strings.Join(s.Tags, ", ")
+			fmt.Printf("|%-26s|%-26s|%-18s|%-12s|%-20s|\n", s.Name, ips, ports, accessTypes, tags)
+		}
+
 	},
 }
 

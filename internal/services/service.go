@@ -4,6 +4,8 @@ import (
 	"net"
 	"strconv"
 	"fmt"
+	"errors"
+	"strings"
 )
 
 type Protocol int
@@ -27,6 +29,19 @@ func (p *Protocol) String() string {
 	}
 }
 
+func (p *Protocol) FromString(s string) (Protocol, error) {
+	switch strings.ToLower(s) {
+	case "icmp":
+		return ProtocolICMP, nil
+	case "tcp":
+		return ProtocolTCP, nil
+	case "udp":
+		return ProtocolUDP, nil
+	default:
+		return 0, errors.New("unknown protocol")
+	}
+}
+
 type AccessType int
 const (
 	AccessTypeOpenSPA AccessType = iota
@@ -39,6 +54,16 @@ func (at *AccessType) String() string {
 	default:
 		return ""
 	}
+}
+
+func (at *AccessType) FromString(s string) error {
+	switch s {
+	case "OpenSPA":
+		*at = AccessTypeOpenSPA
+	default:
+		return errors.New("unknown access type")
+	}
+	return nil
 }
 
 
@@ -58,6 +83,32 @@ func (pp *ProtoPort) StringSlice() []string {
 	}
 
 	return []string{proto, p}
+}
+
+// Reverts a string slice into a ProtoPort (opposite of StringSlice).
+func (pp *ProtoPort) FromStringSlice(s []string) error {
+	if len(s) != 1 && len(s) != 2 {
+		return errors.New("unknown ProtoPort string slice")
+	}
+
+	var proto Protocol
+	proto, err := proto.FromString(s[0])
+	if err != nil {
+		return err
+	}
+	pp.Protocol = proto
+
+	if len(s) == 1 {
+		return nil
+	}
+
+	port, err := strconv.Atoi(s[1])
+	if err != nil {
+		return err
+	}
+	pp.Port = uint16(port)
+
+	return nil
 }
 
 // Stringify the ProtoPort like so: 22/tcp
@@ -84,4 +135,31 @@ type Service struct {
 	ProtoPort []ProtoPort
 	Tags []string
 	AccessType []AccessType
+}
+
+// Returns slice of the services IP's as strings
+func (s *Service) IpsToStrings() []string {
+	ips := make([]string, 0, len(s.Ips))
+	for _, ip := range s.Ips {
+		ips = append(ips, ip.String())
+	}
+	return ips
+}
+
+// Returns slice of the services ports as strings
+func (s *Service) ProtoPortToString() []string {
+	pp := make([]string, 0, len(s.ProtoPort))
+	for _, p := range s.ProtoPort {
+		pp = append(pp, p.String())
+	}
+	return pp
+}
+
+// Returns slice of services access type as strings
+func (s *Service) AccessTypeToString() []string {
+	at := make([]string, 0, len(s.AccessType))
+	for _, a := range s.AccessType {
+		at = append(at, a.String())
+	}
+	return at
 }

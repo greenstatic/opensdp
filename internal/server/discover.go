@@ -3,9 +3,11 @@ package server
 import (
 	"net/http"
 	"encoding/json"
+	"github.com/greenstatic/opensdp/internal/services"
+	"net"
 )
 
-type DiscoverResponseServices struct {
+type DiscoverResponseService struct {
 	Name string `json:"name"`
 	IPs []string `json:"ips"`
 	Ports [][]string `json:"ports"`
@@ -16,10 +18,89 @@ type DiscoverResponseServices struct {
 type DiscoverResponse struct {
 	Success bool `json:"success"`
 	DeviceId string `json:"deviceId"`
-	Services []DiscoverResponseServices `json:"services"`
+	Services []DiscoverResponseService `json:"services"`
+}
+
+// Fills a DiscoverResponseService struct from a services.Service struct.
+func (drs *DiscoverResponseService) Create(service services.Service) error {
+	// Name field
+	drs.Name = service.Name
+
+	// IP field
+	ips := make([]string, 0, len(service.Ips))
+	for _, ip := range service.Ips {
+		ips = append(ips, ip.String())
+	}
+	drs.IPs = ips
+
+	// Ports field
+	ports := make([][]string, 0, len(service.ProtoPort))
+	for _, portCombo := range service.ProtoPort {
+		ports = append(ports, portCombo.StringSlice())
+	}
+	drs.Ports = ports
+
+	// Tags field
+	drs.Tags = service.Tags
+
+	// Access Type field
+	accessTypes := make([]string, 0, len(service.AccessType))
+	for _, at := range service.AccessType {
+		accessTypes = append(accessTypes, at.String())
+	}
+	drs.AccessType = accessTypes
+
+	return nil
+}
+
+// Returns a services.Service struct from that data in the DiscoverResponseServices.
+func (drs *DiscoverResponseService) ToService() (services.Service, error) {
+	s := services.Service{}
+	// Name field
+	s.Name = drs.Name
+
+	// IP field
+	ips := make([]net.IP, 0, len(drs.IPs))
+	for _, ip := range drs.IPs {
+		ips = append(ips, net.ParseIP(ip))
+	}
+	s.Ips = ips
+
+	// Ports field
+	ports := make([]services.ProtoPort, 0, len(drs.Ports))
+	for _, portCombo := range drs.Ports {
+		pp := services.ProtoPort{}
+		err := pp.FromStringSlice(portCombo)
+		if err != nil {
+			return services.Service{}, err
+		}
+
+		ports = append(ports, pp)
+	}
+	s.ProtoPort = ports
+
+	// Tags field
+	s.Tags = drs.Tags
+
+	// Access Type field
+	accessTypes := make([]services.AccessType, 0, len(drs.AccessType))
+	for _, at := range drs.AccessType {
+		var a services.AccessType
+		err := a.FromString(at)
+
+		if err != nil {
+			return services.Service{}, err
+		}
+		accessTypes = append(accessTypes, a)
+	}
+	s.AccessType = accessTypes
+
+	return s, nil
 }
 
 
+// Wrapper handler for the discover endpoint. The wrapper allows us to
+// inject the clients slice into the handler function.
 func (s *Server) discoverResponseWrapper() (func (w http.ResponseWriter, req *http.Request)) {
 
 	return func (w http.ResponseWriter, req *http.Request) {
@@ -39,36 +120,10 @@ func (s *Server) discoverResponseWrapper() (func (w http.ResponseWriter, req *ht
 			return
 		}
 
-		cServices := make([]DiscoverResponseServices, 0, len(client.Services))
+		cServices := make([]DiscoverResponseService, 0, len(client.Services))
 		for _, srv := range client.Services {
-			drs := DiscoverResponseServices{}
-			// Name field
-			drs.Name = srv.Service.Name
-
-			// IP field
-			ips := make([]string, 0, len(srv.Service.Ips))
-			for _, ip := range srv.Service.Ips {
-				ips = append(ips, ip.String())
-			}
-			drs.IPs = ips
-
-			// Ports field
-			ports := make([][]string, 0, len(srv.Service.ProtoPort))
-			for _, portCombo := range srv.Service.ProtoPort {
-				ports = append(ports, portCombo.StringSlice())
-			}
-			drs.Ports = ports
-
-			// Tags field
-			drs.Tags = srv.Service.Tags
-
-			// Access Type field
-			accessTypes := make([]string, 0, len(srv.Service.AccessType))
-			for _, at := range srv.Service.AccessType {
-				accessTypes = append(accessTypes, at.String())
-			}
-			drs.AccessType = accessTypes
-
+			drs := DiscoverResponseService{}
+			drs.Create(srv.Service)
 			cServices = append(cServices, drs)
 		}
 

@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"crypto/x509"
 	"net/http"
-	"fmt"
 	netUrl "net/url"
 )
 
@@ -17,22 +16,23 @@ type Client struct {
 	ClientKeyPath string
 }
 
-
-func (c *Client) Request() error {
+// Perform a GET request on the urlpath of the client server. Return the
+// response as a byte slice.
+func (c *Client) Request(urlpath string) ([]byte, error) {
 
 	// Build url
 	urlRawStr := "https://" + c.ServerUrl
 	urlParsed, err := netUrl.Parse(urlRawStr)
 	if err != nil {
 		log.WithField("url", urlRawStr).Error("Failed to build server url")
-		return err
+		return nil, err
 	}
 
 	url := urlParsed.String()
 	if url[len(url) - 1:] != "/" {
 		url += "/"
 	}
-	url += "discover"
+	url += urlpath
 
 	log.WithFields(log.Fields{
 		"url": url,
@@ -44,16 +44,17 @@ func (c *Client) Request() error {
 
 	cert, err := tls.LoadX509KeyPair(c.ClientCertPath, c.ClientKeyPath)
 	if err != nil {
-		log.Fatalln("Unable to load cert", err)
-		return err
+		log.Error("Unable to load client keypair")
+		return nil, err
 	}
 
 	clientCACert, err := ioutil.ReadFile(c.CAPath)
 	if err != nil {
-		log.Fatal("Unable to open cert", err)
-		return err
+		log.Error("Unable to open ca certificate")
+		return nil, err
 	}
 
+	// Trust only the CA certificate
 	clientCertPool := x509.NewCertPool()
 	clientCertPool.AppendCertsFromPEM(clientCACert)
 
@@ -70,13 +71,21 @@ func (c *Client) Request() error {
 
 	resp, err := client.Get(url)
 	if err != nil {
-		log.Println("Unable to connect to server", err)
-		return err
+		log.Error("Failed to connect to the server")
+		return nil, err
 	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-	fmt.Printf("%s\n", body)
+	if err != nil {
+		log.Error("Failed to read response from server")
+		return nil, err
+	}
 
-	return nil
+	log.WithFields(log.Fields{
+		"url": url,
+		"responseLength": len(body),
+	}).Debug("Successfully connected to the server")
+
+	return body, nil
 }
