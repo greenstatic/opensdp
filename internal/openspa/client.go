@@ -23,14 +23,19 @@ type Request struct {
 	EndPort   uint16
 }
 
-func (c *Client) Send(req Request) error {
+func (c *Client) Send(req Request, continuous bool) error {
 
 	sPort := strconv.Itoa(int(req.StartPort))
 	ePort := strconv.Itoa(int(req.EndPort))
 	serverPort := strconv.Itoa(int(c.Port))
 
 	cmdStr := []string{c.Cmd, "request", c.OSPA, "--protocol", req.Protocol, "-p", sPort, "--end-port", ePort,
-		"--server-ip", c.Server.String(), "--server-port", serverPort, "-a"}
+		"--server-ip", c.Server.String(), "--server-port", serverPort}
+
+	if continuous {
+		cmdStr = append(cmdStr, "-a")
+	}
+
 	log.WithField("command", strings.Join(cmdStr, " ")).Debug("OpenSPA command")
 
 	cmd := exec.Command(cmdStr[0], cmdStr[1:]...)

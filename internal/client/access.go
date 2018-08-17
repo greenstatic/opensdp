@@ -13,14 +13,14 @@ func (c *Client) Access(serv services.Service) error {
 	for _, at := range serv.AccessType {
 		switch at {
 		case services.AccessTypeOpenSPA:
-			return accessOpenSPAService(serv, c.OpenSPA.Path, c.OpenSPA.OSPA)
+			return AccessOpenSPAService(serv, true, c.OpenSPA.Path, c.OpenSPA.OSPA)
 		}
 	}
 
 	return errors.New("unsupported access type")
 }
 
-func accessOpenSPAService(serv services.Service, openspaPath, ospa string) error {
+func AccessOpenSPAService(serv services.Service, continuous bool, openspaPath, ospa string) error {
 
 	var defaultOpenSPAPort uint16 = 22211
 	client := openspa.Client{
@@ -37,7 +37,7 @@ func accessOpenSPAService(serv services.Service, openspaPath, ospa string) error
 			port.Port,
 		}
 
-		err := client.Send(req)
+		err := client.Send(req, continuous)
 		if err != nil {
 			return err
 		}
@@ -46,7 +46,7 @@ func accessOpenSPAService(serv services.Service, openspaPath, ospa string) error
 	return nil
 }
 
-func ConcurrentAccessServiceContinous(c Client, srvs []services.Service) {
+func ConcurrentAccessServiceContinuous(c Client, srvs []services.Service) {
 
 	failed := make(chan services.Service, 1)
 

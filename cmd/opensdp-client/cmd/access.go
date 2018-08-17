@@ -40,6 +40,10 @@ var accessCmd = &cobra.Command{
 			openspaD,
 		}
 
+		// Unlock the OpenSDP service using OpenSPA
+		openSdpUnlockUsingOpenSpa(c)
+		// OpenSDP server should be available now
+
 		srvs, err := c.Discover()
 		if err != nil {
 			log.Error("Failed to perform discover exchange")
@@ -48,10 +52,10 @@ var accessCmd = &cobra.Command{
 		}
 
 		if all {
-			client.ConcurrentAccessServiceContinous(c, srvs)
+			client.ConcurrentAccessServiceContinuous(c, srvs)
 		} else {
 			srv := findService(srvs, args[0])
-			client.ConcurrentAccessServiceContinous(c, []services.Service{srv})
+			client.ConcurrentAccessServiceContinuous(c, []services.Service{srv})
 		}
 	},
 }
