@@ -1,0 +1,7 @@
+bind: 0.0.0.0
+port: 33311
+ca-cert: "./ca.crt"
+certificate: "./server.crt"
+key: "./server.key"
+clients: "./clients.yaml"
+services: "./services.yaml"

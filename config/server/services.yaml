@@ -1,0 +1,36 @@
+version: 0.1.0
+kind: services
+services:
+- name: example-www
+  # Must be IP and not domain!
+  ip: 192.168.1.1
+  # udp is supported as well
+  ports:
+  - [tcp, 80]
+  - [tcp, 443]
+  tags:
+  - www
+  - internal
+  accessType:
+  # Currently we only support OpenSPA
+  - OpenSPA
+
+- name: example-ssh
+  ip: 192.168.1.1
+  ports:
+  - [tcp, 22]
+  tags:
+  - admin
+  - internal
+  accessType:
+  - OpenSPA
+
+- name: example-icmp
+  ip: 192.168.1.1
+  ports:
+  - [icmp]
+  tags:
+  - admin
+  - internal
+  accessType:
+  - OpenSPA

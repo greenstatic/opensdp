@@ -1,0 +1,10 @@
+version: 0.1.0
+kind: clients
+clients:
+- deviceId: 9f84fbb8-10e8-4b8a-abd2-bb91cbf484df
+  label: alice
+  services:
+  # All these services need to exist in the services.yaml file
+  - name: example-www
+  - name: example-ssh
+  - name: example-icmp
