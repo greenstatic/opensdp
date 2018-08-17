@@ -67,6 +67,7 @@ func (c *Client) Request(urlpath string) ([]byte, error) {
 	tlsConfig := &tls.Config{
 		Certificates: []tls.Certificate{cert},
 		RootCAs:      clientCertPool,
+		ServerName: "OpenSDP-server",
 	}
 
 	tlsConfig.BuildNameToCertificate()
