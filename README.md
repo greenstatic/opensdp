@@ -15,12 +15,24 @@ Currently being a PoC, OpenSDP supports only service discovery for [OpenSPA](htt
 Currently it's only possible to define services and the clients ACL using a series of YAML files.
 This is planned to change in the coming releases.
 
+## Client Usage
+Currently there are two commands: services and access.
+
+### Services
+Returns a list of authorized services.
+
+### Access
+This command is used to acquire access to a service.
+You can use it by specifying the service name, eg. `./openspa-client access example-www`.
+It is also possible to acquire access to all authorized services (returned using the `services` command) using the command line flag `-a`.
+
 ## Setup
-TODO
+A tutorial how to setup OpenSDP with a working OpenSPA installation is available [here](docs/OpenSDP%20Setup%20Tutorial.md).
 
 ## TODO
 - [ ] Add logging to server
 - [ ] Add timeout if HTTP request is taking too long
+- [ ] Fix default config.yaml file error
 
 ## License
 This software is licensed under: [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html).
