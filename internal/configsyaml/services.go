@@ -16,7 +16,7 @@ type ports []string
 
 type serviceFile struct {
 	Name string
-	Ips []string
+	IP string
 	Ports []ports
 	Tags []string
 	AccessType []string `yaml:"accessType"`
@@ -75,13 +75,9 @@ func parseService(s serviceFile) (services.Service, error) {
 	var err error
 
 	// Parse IPs
-	if len(s.Ips) == 0 {
-		return services.Service{}, errors.New("missing field ips")
-	}
-
-	serv.Ips, err = parseIps(s.Ips)
-	if err != nil {
-		return services.Service{}, errors.New(fmt.Sprintf("failed to parse ip: %s", err))
+	serv.IP = net.ParseIP(s.IP)
+	if serv.IP == nil {
+		return services.Service{}, errors.New("failed to parse ip")
 	}
 
 	// Parse protocols & ports

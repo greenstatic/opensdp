@@ -9,7 +9,7 @@ import (
 
 type DiscoverResponseService struct {
 	Name string `json:"name"`
-	IPs []string `json:"ips"`
+	IP string `json:"ip"`
 	Ports [][]string `json:"ports"`
 	Tags []string `json:"tags"`
 	AccessType []string `json:"accessType"`
@@ -27,11 +27,7 @@ func (drs *DiscoverResponseService) Create(service services.Service) error {
 	drs.Name = service.Name
 
 	// IP field
-	ips := make([]string, 0, len(service.Ips))
-	for _, ip := range service.Ips {
-		ips = append(ips, ip.String())
-	}
-	drs.IPs = ips
+	drs.IP = service.IP.String()
 
 	// Ports field
 	ports := make([][]string, 0, len(service.ProtoPort))
@@ -60,11 +56,7 @@ func (drs *DiscoverResponseService) ToService() (services.Service, error) {
 	s.Name = drs.Name
 
 	// IP field
-	ips := make([]net.IP, 0, len(drs.IPs))
-	for _, ip := range drs.IPs {
-		ips = append(ips, net.ParseIP(ip))
-	}
-	s.Ips = ips
+	s.IP = net.ParseIP(drs.IP)
 
 	// Ports field
 	ports := make([]services.ProtoPort, 0, len(drs.Ports))

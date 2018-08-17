@@ -10,10 +10,16 @@ import (
 )
 
 type Client struct {
-	ServerUrl string
+	Server string
 	CAPath  string
 	ClientCertPath string
 	ClientKeyPath string
+	OpenSPA OpenSPADetails
+}
+
+type OpenSPADetails struct {
+	Path string
+	OSPA string
 }
 
 // Perform a GET request on the urlpath of the client server. Return the
@@ -21,7 +27,7 @@ type Client struct {
 func (c *Client) Request(urlpath string) ([]byte, error) {
 
 	// Build url
-	urlRawStr := "https://" + c.ServerUrl
+	urlRawStr := "https://" + c.Server
 	urlParsed, err := netUrl.Parse(urlRawStr)
 	if err != nil {
 		log.WithField("url", urlRawStr).Error("Failed to build server url")

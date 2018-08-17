@@ -131,19 +131,15 @@ func (pp *ProtoPort) String() string {
 
 type Service struct {
 	Name string
-	Ips []net.IP
+	IP net.IP
 	ProtoPort []ProtoPort
 	Tags []string
 	AccessType []AccessType
 }
 
-// Returns slice of the services IP's as strings
-func (s *Service) IpsToStrings() []string {
-	ips := make([]string, 0, len(s.Ips))
-	for _, ip := range s.Ips {
-		ips = append(ips, ip.String())
-	}
-	return ips
+// Interface that implements function to gain access to a service
+type ServiceAccess interface {
+	Access(Service) error
 }
 
 // Returns slice of the services ports as strings

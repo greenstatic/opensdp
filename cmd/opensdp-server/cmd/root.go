@@ -120,6 +120,11 @@ func initFlags() {
 	if viper.GetString("services") == "" {
 		viper.Set("services", defaultServices)
 	}
+
+	defaultClients := filepath.Join(dir, "clients.yaml")
+	if viper.GetString("clients") == "" {
+		viper.Set("clients", defaultClients)
+	}
 }
 
 // Used to route error level logs to stderr and the rest to stdout.

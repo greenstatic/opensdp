@@ -7,13 +7,7 @@ import (
 	"os"
 	"fmt"
 	"strings"
-)
-
-var (
-	serverUrl string
-	caPath string
-	clientCertPath string
-	clientKeyPath string
+	"github.com/spf13/viper"
 )
 
 var servicesCmd = &cobra.Command{
@@ -23,16 +17,17 @@ var servicesCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		ifEmptyReturnError(serverUrl, "missing server URL")
-		ifEmptyReturnError(caPath, "missing ca certificate")
-		ifEmptyReturnError(clientCertPath, "missing client certificate")
-		ifEmptyReturnError(clientKeyPath, "missing client key")
+		openspaD := client.OpenSPADetails{
+			viper.GetString("openspa-path"),
+			viper.GetString("openspa-ospa"),
+		}
 
 		c := client.Client{
-			serverUrl,
-			caPath,
-			clientCertPath,
-			clientKeyPath,
+			viper.GetString("server"),
+			viper.GetString("ca-cert"),
+			viper.GetString("certificate"),
+			viper.GetString("key"),
+			openspaD,
 			}
 
 		services, err := c.Discover()
@@ -48,7 +43,7 @@ var servicesCmd = &cobra.Command{
 		}
 
 		fmt.Println("You have access to the following services:")
-		fmt.Printf("|%-26s|%-26s|%-18s|%-12s|%-20s|\n", "Name", "IP(s)", "Port(s)", "Access Type", "Tag(s)")
+		fmt.Printf("|%-26s|%-26s|%-18s|%-12s|%-20s|\n", "Name", "IP", "Port(s)", "Access Type", "Tag(s)")
 
 		const dashLen = 108
 		for i := 0; i < dashLen; i++ {
@@ -57,32 +52,15 @@ var servicesCmd = &cobra.Command{
 		fmt.Printf("\n")
 
 		for _, s := range services {
-			ips := strings.Join(s.IpsToStrings(), ", ")
 			ports := strings.Join(s.ProtoPortToString(), ", ")
 			accessTypes := strings.Join(s.AccessTypeToString(), ", ")
 			tags := strings.Join(s.Tags, ", ")
-			fmt.Printf("|%-26s|%-26s|%-18s|%-12s|%-20s|\n", s.Name, ips, ports, accessTypes, tags)
+			fmt.Printf("|%-26s|%-26s|%-18s|%-12s|%-20s|\n", s.Name, s.IP.String(), ports, accessTypes, tags)
 		}
 
 	},
 }
 
-func ifEmptyReturnError(variable, err string) {
-	if variable == "" {
-		log.Fatalf(err)
-		os.Exit(badInput)
-	}
-}
-
 func init() {
-	servicesCmd.Flags().StringVarP(&serverUrl, "serverUrl", "s", "",
-		"OpenSDP server url")
-	servicesCmd.Flags().StringVar(&caPath, "ca-cert", "", "certificate of the CA")
-	servicesCmd.Flags().StringVarP(&clientCertPath, "client-cert", "c", "client.crt",
-		"client's certificate")
-	servicesCmd.Flags().StringVarP(&clientKeyPath, "client-key", "k", "client.key",
-		"client's key")
-
-
 	rootCmd.AddCommand(servicesCmd)
 }
