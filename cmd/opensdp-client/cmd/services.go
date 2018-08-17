@@ -1,19 +1,19 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
+	"fmt"
 	"github.com/greenstatic/opensdp/internal/client"
 	log "github.com/sirupsen/logrus"
-	"os"
-	"fmt"
-	"strings"
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
+	"strings"
 )
 
 var servicesCmd = &cobra.Command{
 	Use:   "services",
 	Short: "Returns the client's authorized services",
-	Long: "Returns the client's authorized services",
+	Long:  "Returns the client's authorized services",
 
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -28,7 +28,7 @@ var servicesCmd = &cobra.Command{
 			viper.GetString("certificate"),
 			viper.GetString("key"),
 			openspaD,
-			}
+		}
 
 		services, err := c.Discover()
 		if err != nil {

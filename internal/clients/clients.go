@@ -8,6 +8,6 @@ type ServicePolicy struct {
 
 type Client struct {
 	DeviceId string
-	Label string
+	Label    string
 	Services []ServicePolicy
 }

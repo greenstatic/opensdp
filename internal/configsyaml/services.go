@@ -1,30 +1,30 @@
 package configsyaml
 
 import (
-	"github.com/greenstatic/opensdp/internal/services"
-	"io/ioutil"
-	"gopkg.in/yaml.v2"
 	"errors"
-	"net"
 	"fmt"
-	"strings"
-	"strconv"
+	"github.com/greenstatic/opensdp/internal/services"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
+	"net"
+	"strconv"
+	"strings"
 )
 
 type ports []string
 
 type serviceFile struct {
-	Name string
-	IP string
-	Ports []ports
-	Tags []string
+	Name       string
+	IP         string
+	Ports      []ports
+	Tags       []string
 	AccessType []string `yaml:"accessType"`
 }
 
 type servicesFile struct {
-	Version string
-	Kind string
+	Version  string
+	Kind     string
 	Services []serviceFile
 }
 

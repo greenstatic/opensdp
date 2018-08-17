@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/greenstatic/opensdp/internal/client"
-	"os"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"github.com/greenstatic/opensdp/internal/services"
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"os"
 	"strings"
 )
 
@@ -15,11 +15,11 @@ var (
 )
 
 var accessCmd = &cobra.Command{
-	Use: "access",
+	Use:   "access",
 	Short: "Performs access handshake for authorized service",
-	Long: "Performs access handshake for authorized service",
-	Args: cobra.RangeArgs(0,1),
-	Run: func(cmd *cobra.Command, args[]string) {
+	Long:  "Performs access handshake for authorized service",
+	Args:  cobra.RangeArgs(0, 1),
+	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) == 0 && !all {
 			log.Error("Missing service name (or use -a for all services)")

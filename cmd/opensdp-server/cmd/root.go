@@ -1,29 +1,29 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"fmt"
-	"os"
 	"bytes"
+	"fmt"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 	"path/filepath"
 )
 
 var (
-	Version = "0.1.0"
-	Verbose = false
+	Version      = "0.1.0"
+	Verbose      = false
 	VerboseSplit = false
-	ver = false
-	cfgFile string
+	ver          = false
+	cfgFile      string
 	servicesPath string
-	clientsPath string
+	clientsPath  string
 
-	caPath string
+	caPath         string
 	serverCertPath string
-	serverKeyPath string
-	bind string
-	port uint16
+	serverKeyPath  string
+	bind           string
+	port           uint16
 )
 
 var rootCmd = &cobra.Command{

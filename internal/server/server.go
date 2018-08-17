@@ -1,15 +1,15 @@
 package server
 
 import (
-	"io/ioutil"
-	log "github.com/sirupsen/logrus"
-	"crypto/x509"
 	"crypto/tls"
-	"net/http"
-	"net"
-	"github.com/greenstatic/opensdp/internal/services"
-	"github.com/greenstatic/opensdp/internal/clients"
+	"crypto/x509"
 	"encoding/json"
+	"github.com/greenstatic/opensdp/internal/clients"
+	"github.com/greenstatic/opensdp/internal/services"
+	log "github.com/sirupsen/logrus"
+	"io/ioutil"
+	"net"
+	"net/http"
 	"time"
 )
 
@@ -18,25 +18,24 @@ var (
 )
 
 type Server struct {
-	CAPath string
+	CAPath         string
 	ServerCertPath string
-	ServerKeyPath string
-	Bind string
-	Port string
-	Services []services.Service
-	Clients map[string]clients.Client
+	ServerKeyPath  string
+	Bind           string
+	Port           string
+	Services       []services.Service
+	Clients        map[string]clients.Client
 }
-
 
 func rootResponse(w http.ResponseWriter, req *http.Request) {
 	cn := req.TLS.PeerCertificates[0].Subject.CommonName
 
 	json.NewEncoder(w).Encode(struct {
-		Success bool `json:"success"`
-		Msg string `json:"msg"`
+		Success  bool   `json:"success"`
+		Msg      string `json:"msg"`
 		DeviceId string `json:"deviceId"`
 		Datetime string `json:"datetime"`
-		Version string `json:"version"`
+		Version  string `json:"version"`
 	}{
 		true,
 		"OpenSDP Server",
@@ -64,11 +63,11 @@ func (s *Server) Start() {
 	}
 
 	tlsConfig := &tls.Config{
-		ClientAuth: tls.RequireAndVerifyClientCert,
-		ClientCAs: clientCertPool,
-		CipherSuites: []uint16{tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256},
+		ClientAuth:               tls.RequireAndVerifyClientCert,
+		ClientCAs:                clientCertPool,
+		CipherSuites:             []uint16{tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256},
 		PreferServerCipherSuites: true,
-		MinVersion: tls.VersionTLS12,
+		MinVersion:               tls.VersionTLS12,
 	}
 
 	tlsConfig.BuildNameToCertificate()
@@ -77,7 +76,7 @@ func (s *Server) Start() {
 	http.HandleFunc("/", rootResponse)
 
 	httpServer := &http.Server{
-		Addr: net.JoinHostPort(s.Bind, s.Port),
+		Addr:      net.JoinHostPort(s.Bind, s.Port),
 		TLSConfig: tlsConfig,
 	}
 

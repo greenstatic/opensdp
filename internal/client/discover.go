@@ -1,9 +1,9 @@
 package client
 
 import (
-	"github.com/greenstatic/opensdp/internal/services"
 	"encoding/json"
 	"github.com/greenstatic/opensdp/internal/server"
+	"github.com/greenstatic/opensdp/internal/services"
 )
 
 // Performs the discover request and returns a slice of services the

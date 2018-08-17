@@ -1,25 +1,25 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"fmt"
-	"os"
-	log "github.com/sirupsen/logrus"
 	"bytes"
+	"fmt"
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 )
 
 var (
-	Version = "0.1.0"
-	Verbose = false
+	Version      = "0.1.0"
+	Verbose      = false
 	VerboseSplit = false
-	ver = false
+	ver          = false
 
-	serverUrl string
-	caPath string
+	serverUrl      string
+	caPath         string
 	clientCertPath string
-	clientKeyPath string
-	cfgFile string
+	clientKeyPath  string
+	cfgFile        string
 
 	openspaPath string
 	openspaOSPA string
@@ -38,7 +38,6 @@ to your authorized services.`,
 		cmd.Help()
 	},
 }
-
 
 func init() {
 	cobra.OnInitialize(initConfig)

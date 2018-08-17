@@ -1,11 +1,11 @@
 package client
 
 import (
-	"github.com/greenstatic/opensdp/internal/services"
 	"errors"
 	"github.com/greenstatic/opensdp/internal/openspa"
-	"time"
+	"github.com/greenstatic/opensdp/internal/services"
 	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 func (c *Client) Access(serv services.Service) error {
@@ -46,7 +46,6 @@ func accessOpenSPAService(serv services.Service, openspaPath, ospa string) error
 	return nil
 }
 
-
 func ConcurrentAccessServiceContinous(c Client, srvs []services.Service) {
 
 	failed := make(chan services.Service, 1)
@@ -63,7 +62,6 @@ func ConcurrentAccessServiceContinous(c Client, srvs []services.Service) {
 
 		time.Sleep(200) // small delay
 	}
-
 
 	for {
 		select {

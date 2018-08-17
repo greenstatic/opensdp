@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"github.com/greenstatic/opensdp/internal/server"
-	"strconv"
-	"github.com/spf13/viper"
 	"github.com/greenstatic/opensdp/internal/configsyaml"
+	"github.com/greenstatic/opensdp/internal/server"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"os"
+	"strconv"
 )
 
 func startServer() {

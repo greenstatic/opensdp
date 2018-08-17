@@ -1,26 +1,26 @@
 package openspa
 
 import (
-	"net"
-	"os/exec"
 	log "github.com/sirupsen/logrus"
+	"io"
+	"net"
+	"os"
+	"os/exec"
 	"strconv"
 	"strings"
-	"io"
-	"os"
 )
 
 type Client struct {
-	Cmd string
-	OSPA string
+	Cmd    string
+	OSPA   string
 	Server net.IP
-	Port uint16
+	Port   uint16
 }
 
 type Request struct {
-	Protocol string
+	Protocol  string
 	StartPort uint16
-	EndPort uint16
+	EndPort   uint16
 }
 
 func (c *Client) Send(req Request) error {
@@ -30,7 +30,7 @@ func (c *Client) Send(req Request) error {
 	serverPort := strconv.Itoa(int(c.Port))
 
 	cmdStr := []string{c.Cmd, "request", c.OSPA, "--protocol", req.Protocol, "-p", sPort, "--end-port", ePort,
-						"--server-ip", c.Server.String(), "--server-port", serverPort, "-a"}
+		"--server-ip", c.Server.String(), "--server-port", serverPort, "-a"}
 	log.WithField("command", strings.Join(cmdStr, " ")).Debug("OpenSPA command")
 
 	cmd := exec.Command(cmdStr[0], cmdStr[1:]...)

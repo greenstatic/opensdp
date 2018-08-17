@@ -1,12 +1,12 @@
 package configsyaml
 
 import (
-	"github.com/greenstatic/opensdp/internal/clients"
-	"io/ioutil"
-	"gopkg.in/yaml.v2"
 	"errors"
-	"github.com/satori/go.uuid"
+	"github.com/greenstatic/opensdp/internal/clients"
 	"github.com/greenstatic/opensdp/internal/services"
+	"github.com/satori/go.uuid"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 )
 
 type clientFileServicePolicy struct {
@@ -15,17 +15,17 @@ type clientFileServicePolicy struct {
 
 type clientFile struct {
 	DeviceId string `yaml:"deviceId"`
-	Label string
+	Label    string
 	Services []clientFileServicePolicy
 }
 
 type clientsFile struct {
 	Version string
-	Kind string
+	Kind    string
 	Clients []clientFile
 }
 
-	func ClientsRead(path string, serv []services.Service) (map[string]clients.Client, error) {
+func ClientsRead(path string, serv []services.Service) (map[string]clients.Client, error) {
 	m := make(map[string]clients.Client)
 
 	// Read file
@@ -92,20 +92,20 @@ func parseClient(c clientFile, serv []services.Service) (clients.Client, error) 
 func resolveClientsFileServicePolicy(csp clientFileServicePolicy, serv []services.Service) (
 	clients.ServicePolicy, error) {
 
-		sp := clients.ServicePolicy{}
+	sp := clients.ServicePolicy{}
 
-		found := false
-		for _, s := range serv {
-			if s.Name == csp.Name {
-				sp.Service = s
-				found = true
-				break
-			}
+	found := false
+	for _, s := range serv {
+		if s.Name == csp.Name {
+			sp.Service = s
+			found = true
+			break
 		}
+	}
 
-		if !found {
-			return clients.ServicePolicy{}, errors.New("non-existing service")
-		}
+	if !found {
+		return clients.ServicePolicy{}, errors.New("non-existing service")
+	}
 
-		return sp, nil
+	return sp, nil
 }

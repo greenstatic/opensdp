@@ -1,23 +1,23 @@
 package server
 
 import (
-	"net/http"
 	"encoding/json"
 	"github.com/greenstatic/opensdp/internal/services"
 	"net"
+	"net/http"
 )
 
 type DiscoverResponseService struct {
-	Name string `json:"name"`
-	IP string `json:"ip"`
-	Ports [][]string `json:"ports"`
-	Tags []string `json:"tags"`
-	AccessType []string `json:"accessType"`
+	Name       string     `json:"name"`
+	IP         string     `json:"ip"`
+	Ports      [][]string `json:"ports"`
+	Tags       []string   `json:"tags"`
+	AccessType []string   `json:"accessType"`
 }
 
 type DiscoverResponse struct {
-	Success bool `json:"success"`
-	DeviceId string `json:"deviceId"`
+	Success  bool                      `json:"success"`
+	DeviceId string                    `json:"deviceId"`
 	Services []DiscoverResponseService `json:"services"`
 }
 
@@ -90,21 +90,20 @@ func (drs *DiscoverResponseService) ToService() (services.Service, error) {
 	return s, nil
 }
 
-
 // Wrapper handler for the discover endpoint. The wrapper allows us to
 // inject the clients slice into the handler function.
-func (s *Server) discoverResponseWrapper() (func (w http.ResponseWriter, req *http.Request)) {
+func (s *Server) discoverResponseWrapper() func(w http.ResponseWriter, req *http.Request) {
 
-	return func (w http.ResponseWriter, req *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
 		cn := req.TLS.PeerCertificates[0].Subject.CommonName
 
 		client, ok := s.Clients[cn]
 
 		if !ok {
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(struct{
-				Successful bool `json:"success"`
-				Error string `json:"error"`
+			json.NewEncoder(w).Encode(struct {
+				Successful bool   `json:"success"`
+				Error      string `json:"error"`
 			}{
 				false,
 				"not authorized for any services",
@@ -123,4 +122,3 @@ func (s *Server) discoverResponseWrapper() (func (w http.ResponseWriter, req *ht
 	}
 
 }
-

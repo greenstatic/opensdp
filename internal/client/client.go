@@ -2,19 +2,19 @@ package client
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	"crypto/x509"
 	"net/http"
 	netUrl "net/url"
 )
 
 type Client struct {
-	Server string
-	CAPath  string
+	Server         string
+	CAPath         string
 	ClientCertPath string
-	ClientKeyPath string
-	OpenSPA OpenSPADetails
+	ClientKeyPath  string
+	OpenSPA        OpenSPADetails
 }
 
 type OpenSPADetails struct {
@@ -35,16 +35,16 @@ func (c *Client) Request(urlpath string) ([]byte, error) {
 	}
 
 	url := urlParsed.String()
-	if url[len(url) - 1:] != "/" {
+	if url[len(url)-1:] != "/" {
 		url += "/"
 	}
 	url += urlpath
 
 	log.WithFields(log.Fields{
-		"url": url,
-		"ca": c.CAPath,
+		"url":        url,
+		"ca":         c.CAPath,
 		"clientCert": c.ClientCertPath,
-		"clientKey": c.ClientKeyPath}).Debug("Issuing services request")
+		"clientKey":  c.ClientKeyPath}).Debug("Issuing services request")
 
 	// Adapted from: https://github.com/levigross/go-mutual-tls
 
@@ -67,7 +67,7 @@ func (c *Client) Request(urlpath string) ([]byte, error) {
 	tlsConfig := &tls.Config{
 		Certificates: []tls.Certificate{cert},
 		RootCAs:      clientCertPool,
-		ServerName: "OpenSDP-server",
+		ServerName:   "OpenSDP-server",
 	}
 
 	tlsConfig.BuildNameToCertificate()
@@ -90,7 +90,7 @@ func (c *Client) Request(urlpath string) ([]byte, error) {
 	}
 
 	log.WithFields(log.Fields{
-		"url": url,
+		"url":            url,
 		"responseLength": len(body),
 	}).Debug("Successfully connected to the server")
 

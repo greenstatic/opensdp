@@ -1,19 +1,20 @@
 package services
 
 import (
+	"errors"
+	"fmt"
 	"net"
 	"strconv"
-	"fmt"
-	"errors"
 	"strings"
 )
 
 type Protocol int
+
 const (
 	// https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 	ProtocolICMP Protocol = 1
-	ProtocolTCP Protocol = 6
-	ProtocolUDP Protocol = 17
+	ProtocolTCP  Protocol = 6
+	ProtocolUDP  Protocol = 17
 )
 
 func (p *Protocol) String() string {
@@ -43,6 +44,7 @@ func (p *Protocol) FromString(s string) (Protocol, error) {
 }
 
 type AccessType int
+
 const (
 	AccessTypeOpenSPA AccessType = iota
 )
@@ -66,10 +68,9 @@ func (at *AccessType) FromString(s string) error {
 	return nil
 }
 
-
 type ProtoPort struct {
 	Protocol Protocol
-	Port uint16
+	Port     uint16
 }
 
 // Returns a string slice that contains the [proto, port]. In case the protocol
@@ -130,10 +131,10 @@ func (pp *ProtoPort) String() string {
 }
 
 type Service struct {
-	Name string
-	IP net.IP
-	ProtoPort []ProtoPort
-	Tags []string
+	Name       string
+	IP         net.IP
+	ProtoPort  []ProtoPort
+	Tags       []string
 	AccessType []AccessType
 }
 
