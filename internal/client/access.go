@@ -51,11 +51,12 @@ func ConcurrentAccessServiceContinuous(c Client, srvs []services.Service) {
 	failed := make(chan services.Service, 1)
 
 	for _, srv := range srvs {
+		serviceToAccess := srv
 		go func() {
-			err := c.Access(srv)
+			err := c.Access(serviceToAccess)
 			if err != nil {
 				log.Error(err)
-				failed <- srv
+				failed <- serviceToAccess
 				return
 			}
 		}()

@@ -52,6 +52,7 @@ var accessCmd = &cobra.Command{
 		}
 
 		if all {
+			log.WithField("count", len(srvs)).Info("Gaining access to all authorized services")
 			client.ConcurrentAccessServiceContinuous(c, srvs)
 		} else {
 			srv := findService(srvs, args[0])
