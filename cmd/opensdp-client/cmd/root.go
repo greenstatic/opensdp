@@ -7,10 +7,13 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
+	"path/filepath"
 )
 
+const defaultConfigFile = "config.yaml"
+
 var (
-	Version      = "0.1.1"
+	Version      = "0.1.2"
 	Verbose      = false
 	VerboseSplit = false
 	ver          = false
@@ -54,7 +57,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&openspaOSPA, "openspa-ospa", "client.ospa",
 		"OpenSPA client OSPA file")
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default: ./config.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "",
+		fmt.Sprintf("config file (default: ./%s)", defaultConfigFile))
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
 	rootCmd.PersistentFlags().BoolVar(&VerboseSplit, "verbose-split", false,
 		"split output to stdout (until but not including error level) and stderr (error level)")
@@ -83,14 +87,14 @@ func initConfig() {
 		// Use config file path provided by the flag
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// User default
-		dir, err := os.Executable()
+		// User default config file located inside the same dir as the executable
+		exePath, err := os.Executable()
 		if err != nil {
 			panic(err)
 		}
 
-		viper.AddConfigPath(dir)
-		viper.SetConfigName("config.yaml")
+		viper.AddConfigPath(filepath.Dir(exePath))
+		viper.SetConfigFile(defaultConfigFile)
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
