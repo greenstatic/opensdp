@@ -27,15 +27,34 @@ Let's create our server keypair
 ```bash
 openssl genrsa -out server.key 2048
 
-# Fill out the certificate info as you like EXCEPT the common name (CN)!
-# The CN should be "OpenSDP-server"
-openssl req -new -key server.key -out server.csr
+# Create a configuration file for a CSR.
+# Fill out the certificate info as you like EXCEPT the common name (CN) and the subjectAltName (SAN)!
+# The CN and SAN should be "OpenSDP-server".
+nano server.cnf
+[req]
+distinguished_name = req_distinguished_name
+req_extensions = req_ext
+prompt = no
+
+[req_distinguished_name]
+C   = <Country Name (2 letter code)>
+ST  = <State or Province Name (full name)>
+L   = <Locality Name (eg, city)>
+O   = <Organization Name (eg, company)>
+OU  = <Organizational Unit Name (eg, section)>
+CN  = OpenSDP-server
+
+[req_ext]
+subjectAltName = DNS: OpenSDP-server
+
+# Create a CSR from the configuration file.
+openssl req -new -key server.key -out server.csr -config server.cnf
 
 # Sign the CSR with our CA to create a 365 day valid cert
-openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -out server.crt -days 365 -CAcreateserial
+openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -out server.crt -days 365 -CAcreateserial -extensions req_ext -extfile server.cnf
 
-# We don't need the CSR anymore
-rm server.csr
+# We don't need the CSR and configuration file anymore
+rm server.csr server.cnf
 ```
 
 Next, let's create a client's keypair (this step is identical for all clients).
